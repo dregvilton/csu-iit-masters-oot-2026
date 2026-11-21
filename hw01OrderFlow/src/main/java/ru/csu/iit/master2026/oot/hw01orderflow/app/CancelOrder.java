@@ -1,3 +1,4 @@
+
 package ru.csu.iit.master2026.oot.hw01orderflow.app;
 
 import ru.csu.iit.master2026.oot.hw01orderflow.domain.Money;
@@ -18,7 +19,9 @@ public final class CancelOrder {
     public void cancel(OrderId id) {
         Order order = orders.find(id)
                 .orElseThrow(() -> new IllegalArgumentException("Заказ не найден " + id));
-        Money refund = order.status().paid() ? order.total() : Money.ZERO;
+
+        Money refund = order.paid() ? order.total() : Money.ZERO;
+
         order.cancel();
         orders.save(order);
         notifier.orderCancelled(order, refund);

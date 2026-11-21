@@ -1,3 +1,4 @@
+
 package ru.csu.iit.master2026.oot.hw01orderflow.app;
 
 import ru.csu.iit.master2026.oot.hw01orderflow.domain.Money;
@@ -33,18 +34,21 @@ public abstract class SalesReport {
         List<Order> all = orders.findAll();
         int express = 0;
         Money revenue = Money.ZERO;
+
         for (Order order : all) {
             if (order.delivery().express()) {
                 express++;
             }
-            if (order.status().paid()) {
+            if (order.paid()) {
                 revenue = revenue.plus(order.total());
             }
             row(out, order);
         }
+
         Optional<OrderId> largest = all.stream()
                 .max(Comparator.comparing(Order::total))
                 .map(Order::id);
+
         footer(out, new Totals(all.size(), express, revenue, largest));
         return out.toString();
     }

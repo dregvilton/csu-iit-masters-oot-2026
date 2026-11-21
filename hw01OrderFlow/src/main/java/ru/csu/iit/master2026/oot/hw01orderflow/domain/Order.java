@@ -30,6 +30,7 @@ public final class Order implements Iterable<OrderItem> {
     private final Promo promo;
     private final boolean insured;
     private OrderStatus status = OrderStatus.NEW;
+    private OrderStatus statusBeforeHold;
 
     private Order(OrderId id, Builder builder) {
         this.id = Objects.requireNonNull(id);
@@ -116,8 +117,20 @@ public final class Order implements Iterable<OrderItem> {
         status = status.ship();
     }
 
+    public void hold() {
+        OrderStatus next = status.hold();
+        statusBeforeHold = status;
+        status = next;
+    }
+
+    public void resume() {
+        status = status.resume(statusBeforeHold);
+        statusBeforeHold = null;
+    }
+
     public void cancel() {
         status = status.cancel();
+        statusBeforeHold = null;
     }
 
     public OrderId id() {
@@ -140,6 +153,13 @@ public final class Order implements Iterable<OrderItem> {
 
     public OrderStatus status() {
         return status;
+    }
+
+    /** Заказ оплачен, в том числе если его приостановили после оплаты. */
+    public boolean paid() {
+        return status == OrderStatus.ON_HOLD
+                ? statusBeforeHold.paid()
+                : status.paid();
     }
 
     @Override

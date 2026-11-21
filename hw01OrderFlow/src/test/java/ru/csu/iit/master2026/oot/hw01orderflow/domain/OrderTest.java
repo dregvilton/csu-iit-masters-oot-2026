@@ -170,4 +170,102 @@ class OrderTest {
 
         assertThat(a).isEqualTo(b);
     }
+
+    @Test
+    void новый_заказ_можно_приостановить_и_возобновить() {
+        var order = Order.builder()
+                .customer(customer)
+                .items(items)
+                .delivery(new CourierDelivery())
+                .build(id);
+
+        order.hold();
+
+        assertThat(order.status()).isEqualTo(OrderStatus.ON_HOLD);
+        assertThat(order.paid()).isFalse();
+
+        order.resume();
+
+        assertThat(order.status()).isEqualTo(OrderStatus.NEW);
+        assertThat(order.paid()).isFalse();
+    }
+
+    @Test
+    void оплаченный_заказ_можно_приостановить_и_возобновить() {
+        var order = Order.builder()
+                .customer(customer)
+                .items(items)
+                .delivery(new CourierDelivery())
+                .build(id);
+
+        order.pay();
+        order.hold();
+
+        assertThat(order.status()).isEqualTo(OrderStatus.ON_HOLD);
+        assertThat(order.paid()).isTrue();
+
+        order.resume();
+
+        assertThat(order.status()).isEqualTo(OrderStatus.PAID);
+        assertThat(order.paid()).isTrue();
+    }
+
+    @Test
+    void приостановленный_заказ_нельзя_оплатить_отправить_или_приостановить_повторно() {
+        var order = Order.builder()
+                .customer(customer)
+                .items(items)
+                .delivery(new CourierDelivery())
+                .build(id);
+
+        order.hold();
+
+        assertThatThrownBy(order::pay)
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(order::ship)
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(order::hold)
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThat(order.status()).isEqualTo(OrderStatus.ON_HOLD);
+
+        order.resume();
+
+        assertThatThrownBy(order::resume)
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThat(order.status()).isEqualTo(OrderStatus.NEW);
+    }
+
+    @Test
+    void отправленный_и_отменённый_заказы_нельзя_приостановить() {
+        var shipped = Order.builder()
+                .customer(customer)
+                .items(items)
+                .delivery(new CourierDelivery())
+                .build(id);
+
+        shipped.pay();
+        shipped.ship();
+
+        assertThatThrownBy(shipped::hold)
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThat(shipped.status()).isEqualTo(OrderStatus.SHIPPED);
+
+        var cancelled = Order.builder()
+                .customer(customer)
+                .items(items)
+                .delivery(new CourierDelivery())
+                .build(new OrderId("ORD-2"));
+
+        cancelled.cancel();
+
+        assertThatThrownBy(cancelled::hold)
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThat(cancelled.status()).isEqualTo(OrderStatus.CANCELLED);
+    }
 }

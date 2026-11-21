@@ -59,4 +59,36 @@ class OrderScenariosTest {
         assertThat(notifier.events).containsExactly(
                 "placed ORD-1", "paid ORD-1", "cancelled ORD-1 refund 64990.00 руб.");
     }
+
+    @Test
+    void отмена_приостановленного_оплаченного_заказа_возвращает_деньги() {
+        Order order = placeOrder.place(
+                Order.builder().customer(anna).items(laptop).delivery(new CourierDelivery()));
+
+        payOrder.pay(order.id(), rubles(64990));
+        order.hold();
+
+        cancelOrder.cancel(order.id());
+
+        assertThat(order.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(notifier.events).containsExactly(
+                "placed ORD-1",
+                "paid ORD-1",
+                "cancelled ORD-1 refund 64990.00 руб.");
+    }
+
+    @Test
+    void отмена_приостановленного_неоплаченного_заказа_без_возврата() {
+        Order order = placeOrder.place(
+                Order.builder().customer(anna).items(laptop).delivery(new CourierDelivery()));
+
+        order.hold();
+
+        cancelOrder.cancel(order.id());
+
+        assertThat(order.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(notifier.events).containsExactly(
+                "placed ORD-1",
+                "cancelled ORD-1 refund 0.00 руб.");
+    }
 }
