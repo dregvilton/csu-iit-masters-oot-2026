@@ -1,6 +1,5 @@
 package ru.csu.iit.master2026.oot.hw01orderflow.app;
 
-import ru.csu.iit.master2026.oot.hw01orderflow.domain.ExpressDelivery;
 import ru.csu.iit.master2026.oot.hw01orderflow.domain.Money;
 import ru.csu.iit.master2026.oot.hw01orderflow.domain.Order;
 import ru.csu.iit.master2026.oot.hw01orderflow.domain.OrderId;
@@ -35,7 +34,7 @@ public abstract class SalesReport {
         int express = 0;
         Money revenue = Money.ZERO;
         for (Order order : all) {
-            if (order.delivery() instanceof ExpressDelivery) {
+            if (order.delivery().express()) {
                 express++;
             }
             if (order.status().paid()) {

@@ -11,4 +11,12 @@ public interface DeliveryTariff {
     Money cost(Money goods);
 
     int days();
+
+    default boolean express() {
+        return false;
+    }
+
+    default String promise() {
+        return "";
+    }
 }

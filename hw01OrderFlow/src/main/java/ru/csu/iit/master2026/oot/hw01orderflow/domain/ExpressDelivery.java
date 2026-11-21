@@ -14,4 +14,14 @@ public record ExpressDelivery() implements DeliveryTariff {
     public int days() {
         return 1;
     }
+
+    @Override
+    public boolean express() {
+        return true;
+    }
+
+    @Override
+    public String promise() {
+        return "Экспресс-доставка: привезём завтра.";
+    }
 }

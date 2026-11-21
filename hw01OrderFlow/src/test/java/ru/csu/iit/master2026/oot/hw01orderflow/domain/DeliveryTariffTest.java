@@ -24,4 +24,13 @@ class DeliveryTariffTest {
         assertThat(express.cost(rubles(64990))).isEqualTo(rubles(500));
         assertThat(express.days()).isEqualTo(1);
     }
+
+    @Test
+    void экспресс_в_день_заказа_900_рублей() {
+        var sameDay = new SameDayDelivery();
+
+        assertThat(sameDay.cost(rubles(350))).isEqualTo(rubles(900));
+        assertThat(sameDay.cost(rubles(64990))).isEqualTo(rubles(900));
+        assertThat(sameDay.days()).isZero();
+    }
 }

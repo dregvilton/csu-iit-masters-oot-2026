@@ -9,6 +9,8 @@ import ru.csu.iit.master2026.oot.hw01orderflow.domain.Email;
 import ru.csu.iit.master2026.oot.hw01orderflow.domain.ExpressDelivery;
 import ru.csu.iit.master2026.oot.hw01orderflow.domain.Order;
 import ru.csu.iit.master2026.oot.hw01orderflow.infra.InMemoryOrderRepository;
+import ru.csu.iit.master2026.oot.hw01orderflow.domain.SameDayDelivery;
+import ru.csu.iit.master2026.oot.hw01orderflow.domain.Pickup;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.csu.iit.master2026.oot.hw01orderflow.domain.Money.rubles;
@@ -49,5 +51,25 @@ class SalesReportTest {
                 ORD-2;NEW;65000
                 TOTAL;2;6549000
                 """);
+    }
+
+    @Test
+    void оба_экспресс_тарифа_учитываются_в_отчёте() {
+        Customer anna = new Customer(new CustomerId("c-1"), "Анна",
+                new Email("anna@example.ru"), "+79000000001");
+        PlaceOrder placeOrder = new PlaceOrder(repository, new RecordingNotifier());
+
+        placeOrder.place(Order.builder()
+                .customer(anna)
+                .item("Кружка", 1, rubles(350))
+                .delivery(new SameDayDelivery()));
+
+        placeOrder.place(Order.builder()
+                .customer(anna)
+                .item("Кружка", 1, rubles(350))
+                .delivery(new Pickup()));
+
+        assertThat(new TextSalesReport(repository).render())
+                .endsWith("Заказов: 4, экспресс: 2, выручка: 65490.00 руб., крупнейший: ORD-1");
     }
 }
