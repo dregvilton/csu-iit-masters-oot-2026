@@ -1,13 +1,11 @@
 package ru.csu.iit.master2026.oot.hw01bank;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Примеры, с которых можно начать. Уберите {@code @Disabled}, когда появится реализация, и допишите свои тесты. */
-@Disabled("Снимите, когда реализуете Amount, Account, команды и Ledger")
 class BankExampleTest {
 
     private final Account anna = Account.debit(new AccountId("40817-001"));
